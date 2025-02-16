@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solar System</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Base Styling */
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+      /* background: #000; */
+    }
+    
+    /* White overlay: initially white, fades out with scroll */
+    #whiteOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 9; /* below header (z-index: 10) and above parallax images */
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+    }
+    
+    /* Scroll Progress Bar */
+    #progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      z-index: 100;
+    }
+    
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #fff;
+      transition: width 0.1s ease-out;
+    }
+    
+    /* Fixed Header with scaling effect */
+    header {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%) scale(1);
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }
+    
+    /* Section Layout */
+    section {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 20px 20px; /* Top padding to avoid header overlap */
+      overflow: hidden;
+    }
+    
+    /* Parallax Background Layer */
+    .parallax-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      opacity: 0.8;
+      z-index: -1;
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+      background-blend-mode: overlay;
+      filter: blur(0.5px);
+    }
+    
+    /* Content Box Styling with fade and slide-in animation */
+    .content-box {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 600px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.8);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.7s ease-out;
+    }
+    
+    /* Animate content box when section is in view */
+    section.in-view .content-box {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .content-box h2 {
+      margin-top: 0;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    
+    .content-box p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+    
+    /* Navigation Dots */
+    .planet-nav {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .planet-nav a {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .planet-nav a:hover,
+    .planet-nav a.active {
+      background: white;
+      box-shadow: 0 0 10px white;
+      transform: scale(1.3);
+    }
+    
+    /* Direct background image assignments */
+    #sun .parallax-bg { background-image: url('static/Sun.png'); }
+    #mercury .parallax-bg { background-image: url('static/Mercury.png'); }
+    #venus .parallax-bg { background-image: url('static/Venus.png'); }
+    #earth .parallax-bg { background-image: url('static/Earth.jpg'); }
+    #mars .parallax-bg { background-image: url('static/Mars.png'); }
+    #jupiter .parallax-bg { background-image: url('static/Jupiter.png'); }
+    #saturn .parallax-bg { background-image: url('static/Saturn.png'); }
+    #uranus .parallax-bg { background-image: url('static/Uranus.png'); }
+    #neptune .parallax-bg { background-image: url('static/Neptune.png'); }
+    
+    /* Footer styling */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      font-size: 0.9rem;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <!-- White overlay that fades out as you scroll -->
+  <div id="whiteOverlay"></div>
+  
+  <!-- Scroll Progress Bar -->
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+  
+  <header>
+    <h1>Solar System</h1>
+  </header>
+  
+  <div class="planet-nav">
+    <a href="#sun" title="Sun"></a>
+    <a href="#mercury" title="Mercury"></a>
+    <a href="#venus" title="Venus"></a>
+    <a href="#earth" title="Earth"></a>
+    <a href="#mars" title="Mars"></a>
+    <a href="#jupiter" title="Jupiter"></a>
+    <a href="#saturn" title="Saturn"></a>
+    <a href="#uranus" title="Uranus"></a>
+    <a href="#neptune" title="Neptune"></a>
+  </div>
+  
+  <!-- Sections with Parallax Background -->
+  <section id="sun">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>The Sun</h2>
+      <p>Our solar system's central star and energy source, a G-type main-sequence star that contains 99.86% of the system's mass. It's approximately 4.6 billion years old and will continue shining for about another 5 billion years.</p>
+    </div>
+  </section>
+  
+  <section id="mercury">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Mercury</h2>
+      <p>The closest planet to the Sun and the smallest in our solar system. Its surface is heavily cratered and similar in appearance to our Moon. It has no atmosphere and experiences extreme temperature variations.</p>
+    </div>
+  </section>
+  
+  <section id="venus">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Venus</h2>
+      <p>The hottest planet in our solar system, with a thick atmosphere that traps heat in a runaway greenhouse effect. Surface temperatures can reach a scorching 900°F (475°C), hot enough to melt lead.</p>
+    </div>
+  </section>
+  
+  <section id="earth">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Earth</h2>
+      <p>Our home planet, the only known world that supports life. It has a protective atmosphere, liquid water, and a perfect distance from the Sun to maintain habitable conditions for millions of species.</p>
+    </div>
+  </section>
+  
+  <section id="mars">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Mars</h2>
+      <p>The red planet, known for its rusty iron-rich soil. With polar ice caps, seasons, and evidence of ancient flowing water, Mars is a primary target for future human exploration and potential colonization.</p>
+    </div>
+  </section>
+  
+  <section id="jupiter">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Jupiter</h2>
+      <p>The largest planet in our solar system, a gas giant with a mass 2.5 times that of all other planets combined. Its iconic Great Red Spot is a massive storm that has been raging for hundreds of years.</p>
+    </div>
+  </section>
+  
+  <section id="saturn">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Saturn</h2>
+      <p>Famous for its spectacular ring system, which consists of ice particles, rocky debris, and dust. Despite its massive size, Saturn has the lowest density of all planets and would float in water if there were an ocean large enough.</p>
+    </div>
+  </section>
+  
+  <section id="uranus">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Uranus</h2>
+      <p>An ice giant with a unique axial tilt of nearly 98 degrees, causing it to rotate on its side. This gives Uranus extreme seasons, with each pole getting 42 years of continuous sunlight followed by 42 years of darkness.</p>
+    </div>
+  </section>
+  
+  <section id="neptune">
+    <div class="parallax-bg"></div>
+    <div class="content-box">
+      <h2>Neptune</h2>
+      <p>The farthest known planet from the Sun, a cold ice giant with the strongest winds in the solar system, reaching speeds of over 1,200 mph. It was the first planet located through mathematical predictions rather than observation.</p>
+    </div>
+  </section>
+  
+  <!-- Footer with copyright notice -->
+  <footer>
+    <p>&copy; Yuvaraj S</p>
+  </footer>
+  
+  <script>
+    // Helper function to check if an element is in the viewport
+    function isInViewport(element) {
+      const rect = element.getBoundingClientRect();
+      return (
+        rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.bottom >= 0
+      );
+    }
+    
+    // Smooth scroll for navigation clicks
+    document.querySelectorAll('.planet-nav a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        document.getElementById(targetId).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+    
+    // On scroll, update parallax backgrounds, trigger content animations, update progress bar, header scaling, and white overlay opacity
+    window.addEventListener('scroll', function() {
+      const scrollPosition = window.pageYOffset;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progressPercent = (scrollPosition / docHeight) * 100;
+      
+      // Update progress bar width
+      document.getElementById('progress-bar').style.width = progressPercent + '%';
+      
+      // Update white overlay opacity: fade out as you scroll (fade threshold = 300px)
+      const whiteOverlay = document.getElementById('whiteOverlay');
+      whiteOverlay.style.opacity = Math.max(1 - (scrollPosition / 300), 0);
+      
+      // Enhanced parallax effect: update background position, scale, and blur effect
+      document.querySelectorAll('.parallax-bg').forEach((bg) => {
+        const parallaxSpeed = 0.5;
+        bg.style.backgroundPositionY = (scrollPosition * parallaxSpeed) + 'px';
+        const scaleFactor = 1 + (scrollPosition / 10000);
+        bg.style.transform = `scale(${scaleFactor})`;
+        // Reduce blur slightly as you scroll (starting from 0.5px)
+        const blurAmount = Math.max(0.5 - (scrollPosition / 10000), 0);
+        bg.style.filter = `blur(${blurAmount}px)`;
+      });
+      
+      // Animate content boxes when sections are in view
+      document.querySelectorAll('section').forEach((section) => {
+        if (isInViewport(section)) {
+          section.classList.add('in-view');
+        } else {
+          section.classList.remove('in-view');
+        }
+      });
+      
+      // Update header scaling effect
+      const header = document.querySelector('header');
+      const scaleValue = Math.max(1 - (scrollPosition / 2000), 0.8);
+      header.style.transform = `translateX(-50%) scale(${scaleValue})`;
+      
+      // Update active navigation dot
+      let current = '';
+      document.querySelectorAll('section').forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (scrollPosition >= (sectionTop - sectionHeight / 3)) {
+          current = section.getAttribute('id');
+        }
+      });
+      
+      document.querySelectorAll('.planet-nav a').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').substring(1) === current) {
+          link.classList.add('active');
+        }
+      });
+    });
+    
+    // Trigger scroll event on load to initialize effects
+    window.dispatchEvent(new Event('scroll'));
+  </script>
+</body>
+</html>
